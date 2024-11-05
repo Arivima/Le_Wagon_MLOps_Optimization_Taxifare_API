@@ -1,0 +1,35 @@
+# Ignore Python cache files and directories
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore virtual environments (if any)
+venv/
+.env/
+
+# Ignore Poetry files related to local environment
+poetry.lock
+
+# Ignore Git version control files
+.git/
+.gitignore
+
+# Ignore test files
+tests/
+
+# Ignore Docker-specific files
+Dockerfile
+.dockerignore
+
+# Ignore OS and editor specific files
+.DS_Store
+*.swp
+*~
+
+# Ignore build artifacts
+dist/
+build/
+*.egg-info/
+
+# Ignore temporary files
+tmp/
