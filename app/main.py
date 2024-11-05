@@ -1,6 +1,5 @@
 # app/main.py
 from fastapi import FastAPI
-from app.api import endpoints
 from fastapi.middleware.cors import CORSMiddleware
 from app.logging import logger
 from app.utils.gcp import load_model_metadata_from_gcs
@@ -44,7 +43,6 @@ async def root():
 
 # TODO : refactor async load model
 
-# app/api/endpoints.py
 from fastapi import APIRouter, HTTPException
 import pandas as pd
 
@@ -52,7 +50,6 @@ from app.utils.gcp import load_model_metadata_from_gcs
 from app.utils.preprocess import preprocess_features
 from app.logging import logger
 
-router = APIRouter()
 
 # Example request:
 # http://127.0.0.1:8000/predict?
@@ -64,7 +61,7 @@ router = APIRouter()
 # &passenger_count=2
 
 
-@router.get("/predict")
+@app.get("/predict")
 def predict(
         pickup_datetime: str,
         pickup_longitude: float,

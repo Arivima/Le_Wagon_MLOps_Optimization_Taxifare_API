@@ -40,14 +40,14 @@ def load_model_metadata_from_gcs():
 
     blob_path =  f"gs://{Config.GCS_BUCKET_NAME}/{oldest_blob.name}"
     print(blob_path)
-    model = spark.load_model(blob_path)
+    # model = spark.load_model(blob_path)
 
-    # Download metadata JSON content
-    metadata_content = oldest_blob.download_as_text()
-    model_metadata = json.loads(metadata_content)
+    # # Download metadata JSON content
+    # metadata_content = oldest_blob.download_as_text()
+    # model_metadata = json.loads(metadata_content)
 
     logger.info("Model metadata loaded successfully from GCS.")
-    return model_metadata
+    # return model_metadata
 
 
 # def load_model(stage="Production") -> keras.Model:

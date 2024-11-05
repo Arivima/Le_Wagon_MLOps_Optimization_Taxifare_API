@@ -1,12 +1,12 @@
-# Le_Wagon_MLOps_Optimization_Taxifare_API
+# Le Wagon - MLOps Optimization : Taxifare API
 # FastAPI Project
 
 A FastAPI-based RESTful API for predicting taxi fares using a trained machine learning model. This project is designed to be deployed on **Google Cloud Run** using **Docker** and **Poetry** for dependency management.
 
 ### Key README Sections
 
-- **Overview**: Describes the project purpose and features.
-- **Setup**: Covers installation, local setup, and testing.
+- **Overview**: Project purpose and features.
+- **Setup**: Installation, local setup, and testing.
 - **Docker Usage**: Details on building and running the Docker container locally.
 - **Google Cloud Deployment**: Provides a step-by-step guide for deploying to Google Cloud Run.
 - **Makefile Commands**: Lists available `make` targets for local and cloud operations.
@@ -14,6 +14,7 @@ A FastAPI-based RESTful API for predicting taxi fares using a trained machine le
 
 ## Overview
 ### Project Structure
+
 . ├── app
 │ ├── api
 │ │ ├── endpoints.py # Main API endpoints
@@ -114,10 +115,16 @@ gcloud services enable artifactregistry.googleapis.com
 
 2. Create the Artifact Repository:
 
-```make create_artifact_repo```
+```
+make create_artifact_repo
+```
+
 3. Authenticate Docker to Artifact Registry:
 
-```make authenticate_docker_to_artifact```
+```
+make authenticate_docker_to_artifact
+```
+
 4. Build and Push Docker Image to Artifact Registry:
 
 ```
@@ -127,7 +134,9 @@ make cloud_docker_push
 
 5. Deploy to Cloud Run:
 
-```make cloud_cloud_run```
+```
+make cloud_cloud_run
+```
 
 6. Verify Deployment:
 
@@ -141,16 +150,16 @@ After deployment, Cloud Run will provide a URL where the API can be accessed.
 
 The project includes a Makefile with useful commands for local development, Docker usage, and Google Cloud deployment:
 
-`local_start_dev`: Start the API locally in development mode with Uvicorn.
-`local_start_prod`: Start the API locally in production mode with Gunicorn and Uvicorn workers.
-`local_docker_build`: Build the Docker image locally.
-`local_docker_run`: Run the Docker container locally.
-`create_artifact_repo`: Create an Artifact Registry for storing Docker images.
-`authenticate_docker_to_artifact`: Authenticate Docker with Google Artifact Registry.
-`cloud_docker_build`: Build the Docker image for cloud deployment.
-`cloud_docker_push`: Push the Docker image to Artifact Registry.
-`cloud_cloud_run`: Deploy the Docker image to Cloud Run.
-`check_deployment`: Check the status of the Cloud Run deployment.
+- `local_start_dev`: Start the API locally in development mode with Uvicorn.
+- `local_start_prod`: Start the API locally in production mode with Gunicorn and Uvicorn workers.
+- `local_docker_build`: Build the Docker image locally.
+- `local_docker_run`: Run the Docker container locally.
+- `create_artifact_repo`: Create an Artifact Registry for storing Docker images.
+- `authenticate_docker_to_artifact`: Authenticate Docker with Google Artifact Registry.
+- `cloud_docker_build`: Build the Docker image for cloud deployment.
+- `cloud_docker_push`: Push the Docker image to Artifact Registry.
+- `cloud_cloud_run`: Deploy the Docker image to Cloud Run.
+- `check_deployment`: Check the status of the Cloud Run deployment.
 
 ## License
 This project is licensed under the MIT License.
