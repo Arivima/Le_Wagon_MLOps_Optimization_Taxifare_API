@@ -27,18 +27,17 @@ def load_model_metadata_from_gcs():
         bucket = client.bucket(bucket_name)
         logger.info('connected to bucket %s', bucket.name)
 
-        processed_uri_prefix = f"gs://{bucket_name}/processed/taxi_data/lr_model_yellow_tripdata_"
-        logger.info('processed_uri_prefix %s', processed_uri_prefix)
-
+        processed_uri_prefix = f"gs://{bucket_name}/processed/taxi_data/json_model_yellow_tripdata_"
         prefix_path = "/".join(processed_uri_prefix.split("/")[3:])
         logger.info(f'Prefix path: {prefix_path}')
 
         blobs = list(bucket.list_blobs(prefix=prefix_path))
         logger.info(f'Number of blobs found: {len(blobs)}')
         if not blobs:
-            raise FileNotFoundError(f"No model files found in GCS path with prefix {prefix_path}")
+            logger.error(f"No model files found in GCS path with prefix {prefix_path}")
+            return None
 
-        pattern = re.compile(r"lr_model_yellow_tripdata_(\d{4}-\d{2})")
+        pattern = re.compile(r"json_model_yellow_tripdata_(\d{4}-\d{2})\.json")
         model_dates = {}
         for blob in blobs:
             match = pattern.search(blob.name)
@@ -47,23 +46,25 @@ def load_model_metadata_from_gcs():
                 model_dates[blob.name] = model_date
                 logger.info(f"Found model for date: {model_date} -> {blob.name}")
         if not model_dates:
-            raise FileNotFoundError(f"No valid model folders found in path '{prefix_path}'")
-
+            logger.error(f"No model files found in GCS path with prefix {prefix_path}")
+            return None
 
         # Find the latest model folder by checking the 'updated' timestamp
         [logger.info(k) for k in model_dates.keys()]
         latest_model_name = max(model_dates, key=model_dates.get)
-        latest_folder_path = "/".join(latest_model_name.split("/")[:3])  # Get folder path up to date part
+        # latest_folder_path = "/".join(latest_model_name.split("/")[:3])  # Get folder path up to date part
         logger.info(f'Latest model folder name: {latest_model_name}')
-        logger.info(f'Latest model folder path: {latest_folder_path}')
+        # logger.info(f'Latest model folder path: {latest_folder_path}')
 
-        # Load the model using MLflow's Spark flavor
-        gcs_model_uri = f"gs://{bucket_name}/{latest_folder_path}"
-        logger.info(f"Attempting to load model from: {gcs_model_uri}")
-        model = mlflow.pyfunc.load_model(model_uri=gcs_model_uri)
+        # Load the model using MLflow
+        # gcs_model_uri = f"gs://{bucket_name}/{latest_folder_path}"
+        logger.info(f"Attempting to load model from: {latest_model_name}")
+        blob = bucket.blob(latest_model_name)
+        json_content = blob.download_as_text()
+        model_params = json.loads(json_content)
 
-        logger.info("✅ Model loaded successfully from GCS.")
-        return model
+        logger.info("✅ Model weights and intercept loaded successfully from GCS.")
+        return model_params
     except Exception as e:
         logger.exception(f"❌ Error loading model from GCS bucket {bucket_name}: {e}")
         raise
