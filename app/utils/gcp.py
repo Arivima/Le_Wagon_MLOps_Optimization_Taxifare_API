@@ -1,11 +1,8 @@
-import os
 import re
 import json
-# from tensorflow import keras
 from google.cloud import storage
 from app.logging import logger
 from app.config import Config
-import mlflow.pyfunc
 
 
 def load_model_metadata_from_gcs():
@@ -22,49 +19,57 @@ def load_model_metadata_from_gcs():
     try:
         logger.info("load_model_metadata_from_gcs")
 
-        client = storage.Client()
         bucket_name = Config.GCS_BUCKET_NAME
+        if not bucket_name:
+            raise ValueError("GCS_BUCKET_NAME is not configured in Config.")
+
+        # connection to gcs
+        client = storage.Client()
         bucket = client.bucket(bucket_name)
         logger.info('connected to bucket %s', bucket.name)
 
+        # paths
         processed_uri_prefix = f"gs://{bucket_name}/processed/taxi_data/json_model_yellow_tripdata_"
         prefix_path = "/".join(processed_uri_prefix.split("/")[3:])
         logger.info(f'Prefix path: {prefix_path}')
 
+        # list blobs
         blobs = list(bucket.list_blobs(prefix=prefix_path))
         logger.info(f'Number of blobs found: {len(blobs)}')
         if not blobs:
             logger.error(f"No model files found in GCS path with prefix {prefix_path}")
             return None
 
+        # find the relevant blob
         pattern = re.compile(r"json_model_yellow_tripdata_(\d{4}-\d{2})\.json")
         model_dates = {}
         for blob in blobs:
-            match = pattern.search(blob.name)
-            if match:
-                model_date = match.group(1)
+            _match = pattern.search(blob.name)
+            if _match:
+                model_date = _match.group(1)
                 model_dates[blob.name] = model_date
-                logger.info(f"Found model for date: {model_date} -> {blob.name}")
+                logger.info(f"Found json for date: {model_date} -> {blob.name}")
         if not model_dates:
-            logger.error(f"No model files found in GCS path with prefix {prefix_path}")
+            logger.error(f"No json files found in GCS path with prefix {prefix_path}")
             return None
 
-        # Find the latest model folder by checking the 'updated' timestamp
+        # select json from the latest month
         [logger.info(k) for k in model_dates.keys()]
         latest_model_name = max(model_dates, key=model_dates.get)
-        # latest_folder_path = "/".join(latest_model_name.split("/")[:3])  # Get folder path up to date part
-        logger.info(f'Latest model folder name: {latest_model_name}')
-        # logger.info(f'Latest model folder path: {latest_folder_path}')
 
-        # Load the model using MLflow
-        # gcs_model_uri = f"gs://{bucket_name}/{latest_folder_path}"
-        logger.info(f"Attempting to load model from: {latest_model_name}")
+        # download json
+        logger.info(f"Attempting to load json from: {latest_model_name}")
         blob = bucket.blob(latest_model_name)
         json_content = blob.download_as_text()
         model_params = json.loads(json_content)
 
+        if "weights" not in model_params or "intercept" not in model_params:
+            logger.error("JSON model file missing required keys: 'weights' or 'intercept'.")
+            return None
+
         logger.info("✅ Model weights and intercept loaded successfully from GCS.")
         return model_params
+
     except Exception as e:
         logger.exception(f"❌ Error loading model from GCS bucket {bucket_name}: {e}")
         raise

@@ -124,14 +124,12 @@ def preprocess_features(X: pd.DataFrame) -> np.ndarray:
 
         return final_preprocessor
 
-    logger.info("----Preprocessing")
     logger.info("Preprocessing features...")
 
     preprocessor = create_sklearn_preprocessor()
     X_processed = preprocessor.fit_transform(X)
 
     logger.info("✅ X_processed, with shape", X_processed.shape)
-    logger.info("----Preprocessed")
 
     return X_processed
 

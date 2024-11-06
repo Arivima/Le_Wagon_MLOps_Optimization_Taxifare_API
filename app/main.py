@@ -44,7 +44,8 @@ async def root():
     if app.state.model is None:
         logger.error("model could not reload")
         return {"status": "Error 500 - model could not reload"}
-    logger.info("Model loaded.")
+    logger.info("Model loaded : %s", app.state.model is not None)
+    logger.info(app.state.model)
     return {"status": "reloaded"}
 
 
