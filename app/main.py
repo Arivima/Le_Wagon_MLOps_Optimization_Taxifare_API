@@ -1,16 +1,28 @@
 # app/main.py
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.logging import logger
 from app.utils.gcp import load_model_metadata_from_gcs
+from app.utils.preprocess import preprocess_features
 
-app = FastAPI()
+from contextlib import asynccontextmanager
+import pandas as pd
 
-print("----fast api loaded")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting up taxifare API application...")
+    yield  # Control passed to the application
+    logger.info("Shutting down taxifare API application...")
+
+app = FastAPI(lifespan=lifespan)
+logger.info("FastApi() loaded")
 
 app.state.model = load_model_metadata_from_gcs()
-
-print("----model loaded", not app.state.model == None)
+logger.info("Model loaded : %s", app.state.model is not None)
+logger.info(app.state.model)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,48 +31,31 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
-print("----CORSMiddleware")
-
-# app.include_router(endpoints.router)
-# print("----include_router")
-
-@app.on_event("startup")
-async def startup_event():
-    print("----startup_event")
-    logger.info("Starting up taxifare api application...")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    print("----shutdown_event")
-    logger.info("Shutting down taxifare api application...")
 
 @app.get("/")
 async def root():
-    print("----root")
+    logger.info("Endpoint : /root")
     return {"status": "ok"}
+
+@app.get("/model_reload")
+async def root():
+    logger.info("Endpoint : /model_reload")
+    app.state.model = load_model_metadata_from_gcs()
+    if app.state.model is None:
+        logger.error("model could not reload")
+        return {"status": "Error 500 - model could not reload"}
+    logger.info("Model loaded.")
+    return {"status": "reloaded"}
 
 
 
 # TODO : refactor async load model
 
-from fastapi import APIRouter, HTTPException
-import pandas as pd
-
-from app.utils.gcp import load_model_metadata_from_gcs
-from app.utils.preprocess import preprocess_features
-from app.logging import logger
-
-
 # Example request:
-# http://127.0.0.1:8000/predict?
-# pickup_datetime=2014-07-06+19:18:00
-# &pickup_longitude=-73.950655
-# &pickup_latitude=40.783282
-# &dropoff_longitude=-73.984365
-# &dropoff_latitude=40.769802
+# http://127.0.0.1:8000/predict?pickup_datetime=2014-07-06+19:18:00
+# &pickup_longitude=-73.950655&pickup_latitude=40.783282
+# &dropoff_longitude=-73.984365&dropoff_latitude=40.769802
 # &passenger_count=2
-
-
 @app.get("/predict")
 def predict(
         pickup_datetime: str,
@@ -73,20 +68,14 @@ def predict(
     """
     Make a single fare prediction based on coefficients and intercept.
     """
-    print("----predict")
+    logger.info("Endpoint : /predict")
     logger.info("Received request for fare prediction with parameters: %s", {
-        "pickup_datetime": pickup_datetime,
-        "pickup_longitude": pickup_longitude,
-        "pickup_latitude": pickup_latitude,
-        "dropoff_longitude": dropoff_longitude,
-        "dropoff_latitude": dropoff_latitude,
-        "passenger_count": passenger_count
+        "pickup_datetime": pickup_datetime, "pickup_longitude": pickup_longitude,
+        "pickup_latitude": pickup_latitude, "dropoff_longitude": dropoff_longitude,
+        "dropoff_latitude": dropoff_latitude, "passenger_count": passenger_count
     })
 
     try:
-        # 💡 Optional trick instead of writing each column name manually:
-        # locals() gets us all of our arguments back as a dictionary
-        # https://docs.python.org/3/library/functions.html#locals
         X_pred = pd.DataFrame({
             "pickup_datetime": [pickup_datetime],
             "pickup_longitude": [pickup_longitude],
@@ -96,7 +85,7 @@ def predict(
             "passenger_count": [passenger_count]
         })
 
-        # Convert to US/Eastern TZ-aware!
+        # Convert to US/Eastern TZ-aware
         X_pred['pickup_datetime'] = pd.to_datetime(X_pred['pickup_datetime']).dt.tz_localize("US/Eastern")
 
         if not app.state.model:
@@ -104,15 +93,15 @@ def predict(
             app.state.model = load_model_metadata_from_gcs()
         model = app.state.model
         if model is None:
-            logger.error("Model not loaded.")
             raise HTTPException(status_code=500, detail="Model not loaded")
-        print("----loaded model_metadata")
+        logger.info("Model loaded.")
 
         coefficients = model["coefficients"]
         intercept = model["intercept"]
+
     except Exception as e:
-        logger.error("Failed to load model metadata: %s", str(e))
-        raise HTTPException(status_code=500, detail="Model metadata could not be loaded")
+        logger.error("Error: %s", str(e))
+        raise
 
     X_processed = preprocess_features(X_pred)
 
@@ -128,8 +117,7 @@ def predict(
     # Calculate the prediction using linear regression formula
     y_pred = intercept + sum(c * f for c, f in zip(coefficients, feature_vector))
 
-    print("----Prediction", y_pred)
-    logger.info("Prediction calculated successfully: %f", y_pred)
+    logger.info("Prediction : %f", y_pred)
 
     return {"fare": y_pred}
 

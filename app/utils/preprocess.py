@@ -1,7 +1,3 @@
-
-import numpy as np
-import pandas as pd
-
 # from colorama import Fore, Style
 
 from sklearn.pipeline import make_pipeline
@@ -9,11 +5,11 @@ from sklearn.compose import ColumnTransformer, make_column_transformer
 from sklearn.preprocessing import OneHotEncoder, FunctionTransformer
 
 from app.logging import logger
-import math
+
 import numpy as np
 import pandas as pd
+import math
 import pygeohash as gh
-
 import time
 import tracemalloc
 
@@ -21,7 +17,7 @@ def simple_time_and_memory_tracker(method):
 
     # ### Log Level
     # 0: Nothing
-    # 1: Print Time and Memory usage of functions
+    # 1: print Time and Memory usage of functions
     LOG_LEVEL = 1
 
     def method_with_trackers(*args, **kw):
@@ -34,7 +30,7 @@ def simple_time_and_memory_tracker(method):
         duration = te - ts
         if LOG_LEVEL > 0:
             output = f"{method.__qualname__} executed in {round(duration, 2)} seconds, using up to {round(peak / 1024**2,2)}MB of RAM"
-            print(output)
+            logger.info(output)
         return result
 
     return method_with_trackers
@@ -128,14 +124,14 @@ def preprocess_features(X: pd.DataFrame) -> np.ndarray:
 
         return final_preprocessor
 
-    print("----Preprocessing")
+    logger.info("----Preprocessing")
     logger.info("Preprocessing features...")
 
     preprocessor = create_sklearn_preprocessor()
     X_processed = preprocessor.fit_transform(X)
 
     logger.info("✅ X_processed, with shape", X_processed.shape)
-    print("----Preprocessed")
+    logger.info("----Preprocessed")
 
     return X_processed
 

@@ -5,6 +5,7 @@ PACKAGE_NAME='taxifare-opt'
 ARTIFACT_REPO_NAME='taxifare'
 IMAGE_NAME='$(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(ARTIFACT_REPO_NAME)/$(PACKAGE_NAME)'
 CLOUD_RUN_CPU=2
+PATH_SERVICE_ACCOUNT_KEY='taxifare-opt-1142853755ce.json'
 
 # Local Development Server (Development Mode)
 local_start_dev:
@@ -19,7 +20,10 @@ local_docker_build:
 	docker build -t $(PACKAGE_NAME) .
 
 local_docker_run:
-	docker run -p 8000:8000 $(PACKAGE_NAME)
+	docker run -p 8000:8000 \
+	 -e GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json \
+	 -v $(shell pwd)/$(PATH_SERVICE_ACCOUNT_KEY):/app/service-account.json \
+	 $(PACKAGE_NAME)
 
 
 # Production - Cloud Deployment Targets
@@ -30,16 +34,23 @@ create_artifact_repo:
 	gcloud artifacts repositories create $(ARTIFACT_REPO_NAME) \
 		--repository-format=docker \
 		--location=$(REGION) \
-		--description="Docker repository for FastAPI app"
+		--description="Docker repository for taxifare FastAPI app"
 
 # Prerequisites: Authentication and Service Enabling
 # Run the following once before deploying:
-# gcloud auth login
-# gcloud config set project $(PROJECT_ID)
+# check service account and project with :
+#	# gcloud config list
+# if not the right config, config with :
+#	# gcloud auth login
+#	# gcloud config set project $(PROJECT_ID)
+# check if the project has enabled the right services :
+#	# gcloud services list --enabled --filter="NAME:run.googleapis.com"
+#	# gcloud services list --enabled --filter="NAME:artifactregistry.googleapis.com"
+# enable services idf they are not listed :
 # gcloud services enable run.googleapis.com
 # gcloud services enable artifactregistry.googleapis.com
 
-# Authenticate Docker with GCP Artifact Registry
+# Authenticate Docker with GCP Artifact Registry - updates docker config ~/.docker/config.json to include auth creds for artifact
 authenticate_docker_to_artifact:
 	gcloud auth configure-docker $(REGION)-docker.pkg.dev
 
