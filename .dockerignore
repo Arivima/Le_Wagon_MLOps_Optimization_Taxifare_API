@@ -1,3 +1,10 @@
+# Ignore log files
+*.log
+
+# Ignore Makefile & README.md - for deployment
+Makefile
+README.md
+
 # Ignore Python cache files and directories
 __pycache__/
 *.py[cod]
@@ -9,6 +16,7 @@ venv/
 
 # Ignore Poetry files related to local environment
 poetry.lock
+taxifare-opt-1142853755ce.json
 
 # Ignore Git version control files
 .git/

@@ -3,8 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# ignore service account json key
+taxifare-opt-1142853755ce.json
 
+# ignore poetry lock
 poetry.lock
+# Ignore log files
+*.log
 # C extensions
 *.so
 

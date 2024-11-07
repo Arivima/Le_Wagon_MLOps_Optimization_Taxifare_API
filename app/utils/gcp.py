@@ -24,7 +24,10 @@ def load_model_metadata_from_gcs():
             raise ValueError("GCS_BUCKET_NAME is not configured in Config.")
 
         # connection to gcs
-        client = storage.Client()
+        project_id = Config.GCP_PROJECT_ID
+        if not project_id:
+            raise ValueError("GCP_PROJECT_ID is not configured in Config.")
+        client = storage.Client(project=project_id)
         bucket = client.bucket(bucket_name)
         logger.info('connected to bucket %s', bucket.name)
 
