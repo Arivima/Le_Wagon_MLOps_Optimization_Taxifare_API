@@ -1,7 +1,7 @@
 # Makefile
 # GCP PROJECT
-GCP_PROJECT_ID='taxifare-opt'
-GCS_BUCKET_NAME='bucket_imane'
+GCP_PROJECT_ID=taxifare-opt
+GCS_BUCKET_NAME=bucket_imane
 REGION='europe-west1'
 # DOCKER LOCAL
 DOCKER_IMAGE_NAME='taxifare-opt'
