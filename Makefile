@@ -1,19 +1,10 @@
 # Makefile
-# GCP PROJECT
-GCP_PROJECT_ID=taxifare-opt
-GCS_BUCKET_NAME=bucket_imane
-REGION='europe-west1'
-# DOCKER LOCAL
-DOCKER_IMAGE_NAME='taxifare-opt'
+include .env
+
 TAG='latest'
-PATH_SERVICE_ACCOUNT_KEY='taxifare-opt-1142853755ce.json'
 DOCKER_CONTAINER_NAME='detached-tmp'
-# ARTIFACT
-ARTIFACT_REPO_NAME='taxifare'
 ARTIFACT_REPO_LOCATION = '$(REGION)-docker.pkg.dev/$(GCP_PROJECT_ID)/$(ARTIFACT_REPO_NAME)'
 ARTIFACT_IMAGE_NAME='$(ARTIFACT_REPO_LOCATION)/$(DOCKER_IMAGE_NAME)'
-# CLOUD RUN
-PACKAGE_NAME='taxifare-opt'
 CLOUD_RUN_CPU=2
 
 ################ DEV LOCAL #################
