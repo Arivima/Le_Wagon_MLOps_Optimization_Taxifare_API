@@ -7,7 +7,7 @@ This FastAPI application provides taxi fare predictions based on ride parameters
 - [Prerequisites](#prerequisites)
 - [Makefile Commands](#makefile-commands)
 - [Environment Setup](#environment-setup)
-- [Quickstart - Local Development](#quickstart-:-local-development)
+- [Quickstart Local Development](#quickstart-local-development)
 - [Production Deployment to Cloud Run](#production-deployment)
 - [API Endpoints](#api-endpoints)
 - [Project Structure](#project-structure)
@@ -85,7 +85,7 @@ Note on Environment Variables:
 This project requires sensitive configuration details (like GCP credentials) stored in a `.env` file and necessary to interact with GCP. The environment variables are loaded automatically using `python-dotenv` (which is installed automatically by `poetry`). This setup ensures that configuration data remains secure and manageable.
 
 
-## Quickstart : Local Development
+## Quickstart Local Development
 
 ### Install Dependencies
 
