@@ -8,11 +8,6 @@ This project was completed as part of a Data Engineering Bootcamp at Le Wagon Pa
 
 The objective of this project was to build a complete ETL and machine learning pipeline—from data ingestion to an end-user interface—using tools covered in the bootcamp. Given a four-day timeframe, we leveraged previous bootcamp exercises as a foundation, enabling us to focus on optimizing and studying the performance of the pipeline.
 
-<img src="images/pipeline.png" alt="Project pipeline" width="800"/>
-
-*The project complete pipeline*
-
-
 Repositories that are part of the Taxifare Project:
 - **Taxifare**:
 A data engineering pipeline that ingests, processes, and stores NYC taxi ride data in cloud storage and a data warehouse.
@@ -27,6 +22,10 @@ A cloud-deployed API providing a prediction endpoint.
 - **Taxifare Front**:
 A `Streamlit` application that allows users to predict taxi fares with our model.
 
+
+
+*The project complete pipeline*
+<img src="images/pipeline.png" alt="Project pipeline" width="800"/>
 
 
 # Taxifare API
